@@ -1,11 +1,17 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
-$servername = "localhost";
-$username = "login";
-$password = "password";
-$dbname = "cod4stats";
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+$bodytag = __DIR__;
+$bodytag = str_replace("/donate-form", "", $bodytag);
+$bodytag = str_replace("\donate-form", "", $bodytag);
+
+$partsStr = str_replace("/parts", "", $bodytag);
+$partsStr = str_replace("\parts", "", $partsStr);
+
+
+ include_once $partsStr. "/data/settings.php";
+
+$conn = new mysqli(DONATE_DB_HOST, DONATE_DB_USER, DONATE_DB_PASSWORD, DONATE_DB_NAME);
 $conn->set_charset("utf8");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -109,7 +115,8 @@ function getdays($amount) {
 </p>
 
 <div class="wa-progress" style="width: 100%;margin: 0 auto;margin-top: 5px;height: 30px;">
-	<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="45" class="wa-progress-bar wa-progress-bar-striped" role="progressbar" style="width: <?php echo $percen;?>%;background-color:#57a443;">
+	<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="45" class="wa-progress-bar wa-progress-bar-striped" 
+	role="progressbar" style="width: <?php echo $percen;?>%;background-color:#57a443;">
 		 
 	</div>
 
@@ -195,7 +202,9 @@ if ($row["user"] != 'неизвестный') {
 }
 
 
-echo '<p style="margin: 0;"><span style="font-size:11px;"><strong>'.date("d.m H:i", strtotime($row["datetime"])).'</strong> + <span style="color:#1ab814;"><strong>'. $row["withdraw_amount"].' ₽ </strong></span><span style="color:#27ae60;"><strong></span>('.$user.' - '.$oplata.')</span></p>';
+echo '<p style="margin: 0;"><span style="font-size:11px;">
+<strong>'.date("d.m H:i", strtotime($row["datetime"])).'</strong> + <span style="color:#1ab814;"><strong>'. $row["withdraw_amount"].' ₽ </strong>
+</span><span style="color:#27ae60;"><strong></span>('.$user.' - '.$oplata.')</span></p>';
 
 
     }

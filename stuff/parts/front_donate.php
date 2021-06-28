@@ -1,11 +1,17 @@
 <?php
 
-$servername = "localhost";
-$username = "login";
-$password = "password";
-$dbname = "cod4stats";
+$bodytag = __DIR__;
+$bodytag = str_replace("/donate-form", "", $bodytag);
+$bodytag = str_replace("\donate-form", "", $bodytag);
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+$partsStr = str_replace("/parts", "", $bodytag);
+$partsStr = str_replace("\parts", "", $partsStr);
+
+
+ include_once $partsStr. "/data/settings.php";
+
+$conn = new mysqli(DONATE_DB_HOST, DONATE_DB_USER, DONATE_DB_PASSWORD, DONATE_DB_NAME);
+ 
 $conn->set_charset("utf8");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -69,11 +75,11 @@ $sumspent = number_format($sumspent, 0, ',', ' ' );
 </p>
 
 <p style="text-align: center;margin: 0;">
-	<a href="http://cod4narod.ru/donate/" rel=""><span style="font-size:18px;"><strong><span style="color:#27ae60;">Поддержать проект</span></strong></span> </a>
+	<a href="<?=DONATE_URL;?>" rel=""><span style="font-size:18px;"><strong><span style="color:#27ae60;">Поддержать проект</span></strong></span> </a>
 </p>
 
 <p style="text-align: center;margin: 0;">
-	<a href="http://cod4narod.ru/donate/" rel="">(и получить <strong><span style="color:#f39c12;">VIP статус</span></strong>)</a>
+	<a href="<?=DONATE_URL;?>" rel="">(и получить <strong><span style="color:#f39c12;">VIP статус</span></strong>)</a>
 </p>
 
 <script>
