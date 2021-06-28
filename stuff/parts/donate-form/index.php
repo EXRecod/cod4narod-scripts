@@ -1,14 +1,26 @@
 <?php
+
+
+$bodytag = __DIR__;
+$bodytag = str_replace("/donate-form", "", $bodytag);
+$bodytag = str_replace("\donate-form", "", $bodytag);
+
+$partsStr = str_replace("/parts", "", $bodytag);
+$partsStr = str_replace("\parts", "", $partsStr);
+
+
+ include_once $partsStr. "/data/settings.php";
+ 
 $guid = "";
 $name = "Без VIP (выберите игрока через Статистику)";
 if (!empty($_GET["guid"])) {
     $guid = (int) $_GET["guid"];
 
-    if (strlen($guid) == 19) {
+    if ((strlen($guid) === 17)||(strlen($guid) == 19)) {
 
-        $stats_db = new PDO('mysql:host=localhost;dbname=cod4stats', 'login', 'password');
+        $stats_db = new PDO('mysql:host='.DB_HOST.';dbname='.DB_NAME.'', DB_USER, DB_PASSWORD);
 
-        $name_query = $stats_db->query("SELECT s_player FROM stats WHERE s_guid = '".$guid."' ORDER by s_lasttime desc limit 1");
+        $name_query = $stats_db->query("SELECT s_player FROM db_stats_0 WHERE s_guid = '".$guid."' ORDER by s_lasttime desc limit 1");
         $name2 = $name_query->fetchColumn();
 
         if (!empty($name2)) {
@@ -22,37 +34,52 @@ if (!empty($_GET["guid"])) {
         $guid = "";
     }
 }
+ 
+ $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+
+if (strpos($_SERVER['REQUEST_URI'], "?guid=") !== false) {
+$actual_link = substr($actual_link, 0, strpos($actual_link, "?guid="));
+}
+$actual_link = str_replace("/parts/donate-form/", "", $actual_link);
+$actual_link = str_replace("\parts\donate-form\\", "", $actual_link);
+
 
 ?>
 <div style="text-align: center;">
-    <p style="text-align: center;">
+   
+
+<?php if(YANDEX_MONEY_STATUS === 1){?>
+
+   <p style="text-align: center;">
         <font color="#27ae60"><span style="font-size: 26px;"><b>Карта, Я.Деньги, с мобильного</b></span></font>
     </p>
 
 
-    <link rel="stylesheet" href="/parts/donate-form/_money.css">
-    <script type="text/javascript" charset="utf-8" src="/parts/donate-form/jquery.min.js"></script>
-    <script type="text/javascript" charset="utf-8" src="/parts/donate-form/_money.js"></script>
-    <script charset="utf-8" src="/parts/donate-form/lodash.min.js"></script>
+    <link rel="stylesheet" href="<?=$actual_link;?>/visual_elements/css/_money.css">
+    <script type="text/javascript" charset="utf-8" src="<?=$actual_link;?>/visual_elements/js/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="<?=$actual_link;?>/visual_elements/js/_money.js"></script>
+    <script charset="utf-8" src="<?=$actual_link;?>/visual_elements/js/lodash.min.js"></script>
 
-    <script charset="utf-8" src="/parts/donate-form/_old-site.ru.js"></script>
+    <script charset="utf-8" src="<?=$actual_link;?>/visual_elements/js/_old-site.ru.js"></script>
 
-    <link rel="Stylesheet" href="/parts/donate-form/b-widget-donate.css">
+    <link rel="Stylesheet" href="<?=$actual_link;?>/visual_elements/css/b-widget-donate.css">
 
     <div class="i-ua_js_yes i-ua_css_standart utilityfocus i-ua_svg_yes i-ua_inlinesvg_yes i-ua_placeholder_yes b-widget-donate"
          data-content-block="this">
         <div class="b-widget-donate__target">
-            GUID и Имя Игрока для установки <span class="form_link">VIP статуса </span>(<span class="vipdays">+22 дня</span> VIP)
+            GUID и Имя Игрока для установки <span class="form_link">VIP статуса </span>(<span class="vipdays" style="font-weight: bold;color: green;
+  text-shadow: 0px 0px 1px black, 0 0 1px white, 0 0 1px darkblue;">+22 дня</span> <span style="color: yellow;
+  text-shadow: 1px 1px 2px black, 0 0 25px blue, 0 0 5px darkblue;">VIP</span>)
         </div>
 
         <form method="POST" target="_blank" class="b-widget-donate__form"
               action="https://money.yandex.ru/quickpay/confirm.xml">
             <input name="label" type="hidden" value="<?= $guid ?>">
-            <input name="receiver" type="hidden" value="41001485874410">
+            <input name="receiver" type="hidden" value="<?=YU_MONEY_ID;?>">
             <input name="quickpay-form" type="hidden" value="donate">
-            <input name="referer" type="hidden" value="https://cod4narod.ru/donate">
-            <input name="targets" type="hidden" value="Поддержка CoD4Narod.RU (<?= ($guid) ? "VIP для ".$name : 'Без VIP' ?>)">
-            <input name="successURL" type="hidden" value="https://cod4narod.ru/thanks">
+            <input name="referer" type="hidden" value="<?=DONATE_URL;?>">
+            <input name="targets" type="hidden" value="Поддержка <?=PROJECT_NAME;?> (<?= ($guid) ? "VIP для ".$name : 'Без VIP' ?>)">
+            <input name="successURL" type="hidden" value="<?=$actual_link;?>/parts/getvip.php">
             <div class="b-widget-donate__comment">
                 <label class="b-widget-donate__label"></label>
                 <div class="b-textarea b-textarea__textarea-compact">
@@ -61,8 +88,9 @@ if (!empty($_GET["guid"])) {
                 </div>
 
                 <div class="b-form__field-hint">Для выбора GUID найдите себя в <a class="form_link" target="_blank"
-                                                                                  href="https://cod4narod.ru/stats/">Статистике</a>, наведите на ник и
-                    нажмите на VIP иконку
+                                                                                  href="<?=DONATE_URL_STATS;?>">Статистике</a>, нажмите на ник, после перехода на страницу -
+                    нажмите на <b style="font-weight: bold;color: #650000;
+  text-shadow: 0px 0px 1px black, 0 0 1px white, 0 0 1px darkblue;">Получить [VIP] для игрока...</b>
                 </div>
 
                 <div class="b-widget-donate__target">
@@ -79,7 +107,7 @@ if (!empty($_GET["guid"])) {
             </div>
             <div class="b-input-text b-input-text_1 b-input-text_inline">
                 <input class="b-input-text__input" name="sum" style="text-align: right;box-sizing: inherit;" type="text"
-                       maxlength="10" value="100"><span class="b-widget-donate__currency">руб.</span></div>
+                       maxlength="10" value="150"><span class="b-widget-donate__currency">руб.</span></div>
 
             <script>
 
@@ -107,6 +135,12 @@ if (!empty($_GET["guid"])) {
                         var days = 0;
 
 
+                         if (amount < 50)
+						 {
+							 alert('Минимум 50 рублей.');
+						 }
+
+
                         if (amount < 10)
                             days = Math.round(amount / 20);
 
@@ -120,22 +154,22 @@ if (!empty($_GET["guid"])) {
                             days = Math.round(amount / 8);
 
                         else if ($(this).val() < 100)
-                            days = Math.round(amount / 5);
+                            days = Math.round(amount / 7);
 
                         else if ($(this).val() < 300)
-                            days = Math.round(amount / 4.5);
+                            days = Math.round(amount / 4.8);
 
                         else if ($(this).val() < 500)
-                            days = Math.round(amount / 4.3);
+                            days = Math.round(amount / 4.8);
 
                         else if ($(this).val() < 1000)
                             days = Math.round(amount / 4.0);
 
                         else if ($(this).val() < 2000)
-                            days = Math.round(amount / 3.5);
+                            days = Math.round(amount / 2.73);
 
                         else
-                            days = Math.round(amount / 3);
+                            days = Math.round(amount / 2);
 
 
                         $('.vipdays').text("+" + days + format_by_count(days));
@@ -155,7 +189,7 @@ if (!empty($_GET["guid"])) {
                         <input type="radio" name="paymentType" checked="checked" class="b-form-radio__radio"
                                id="id1166036927758" value="AC">
                         <span class="b-form-radio__text"><img class="b-icon b-form-radio__ico"
-                                                              src="/parts/donate-form/quickpay-widget__any-card.png" alt=""
+                                                              src="<?=$actual_link;?>/visual_elements/img/quickpay-widget__any-card.png" alt=""
                                                               title=""></span><i class="b-form-radio__click"></i></span>
         </span>
         </label>
@@ -165,7 +199,7 @@ if (!empty($_GET["guid"])) {
                                                                class="b-form-radio__radio" id="id1166036927781"
                                                                value="MC">
                         <span class="b-form-radio__text"><img class="b-icon b-form-radio__ico"
-                                                              src="/parts/donate-form/quickpay-widget__mobile.png" alt=""
+                                                              src="<?=$actual_link;?>/visual_elements/img/quickpay-widget__mobile.png" alt=""
                                                               title=""></span><i class="b-form-radio__click"></i></span>
 			</span>
 		</label>
@@ -175,7 +209,7 @@ if (!empty($_GET["guid"])) {
                         class="b-form-radio__content"><input type="radio" name="paymentType"
                                                              class="b-form-radio__radio" id="id1166036927798"
                                                              value="PC"><span class="b-form-radio__text"><img
-                                class="b-icon b-form-radio__ico" src="/parts/donate-form/quickpay-widget__yamoney.png" alt=""
+                                class="b-icon b-form-radio__ico" src="<?=$actual_link;?>/visual_elements/img/quickpay-widget__yamoney.png" alt=""
                                 title=""></span><i class="b-form-radio__click"></i></span>
 			</span>
 		</label>
@@ -186,18 +220,26 @@ if (!empty($_GET["guid"])) {
 
         </form>
     </div>
+<?php }?>
 
 
+<?php if(WEBMONEY_STATUS === 1){?>
+ 
     <p style="text-align: center;">
         <span style="font-size:26px;"><span style="color:#27ae60;"><strong>WebMoney, Bitcoin, QIWI&nbsp;и др.</strong></span></span>
     </p>
 
     <p style="text-align: center;">
         <iframe height="150" scrolling="no"
-                src="https://funding.webmoney.ru/widgets/horizontal/33984670-2e50-41f2-977b-7cba95e2a9ce?bt=0&amp;hs=1&amp;sum=100&amp;hcc=1&amp;hym=1&amp;hmc=1"
+                src="<?=WEBMONEY;?>"
                 style="border:none;" width="468"></iframe>
     </p>
-    <!--
+	
+<?php } ?>	
+
+
+<?php if(QIWI_STATUS === 1){?>
+  
     <p style="text-align: center;">
         <font color="#27ae60"><span style="font-size: 26px;"><b>Оплата Хостинга (QIWI)</b></span></font>
     </p>
@@ -215,7 +257,7 @@ if (!empty($_GET["guid"])) {
     </p>
 
     <p style="text-align: center;">
-        &nbsp;<span style="font-size:18px;"><strong><a class="form_link" href="https://qiwi.com/payment/form.action?provider=1712" ipsnoembed="true" rel="external nofollow"><span style="color:#27ae60;">https://qiwi.com/payment/form.action?provider=1712</span></a></strong>&nbsp;</span><span style="font-size:14px;">(ЗАО Первый)</span>
+        &nbsp;<span style="font-size:18px;"><strong><a class="form_link" href="<?=QIWI_URL;?>" ipsnoembed="true" rel="external nofollow"><span style="color:#27ae60;"><?=QIWI_URL;?></span></a></strong>&nbsp;</span><span style="font-size:14px;">(ЗАО Первый)</span>
     </p>
 
     <p style="text-align: center;">
@@ -224,12 +266,16 @@ if (!empty($_GET["guid"])) {
 
     <p style="text-align: center;">
         <span style="font-size:14px;">(оплата любым способом,<span style="color:#27ae60;"> без комиссии</span>)</span>
-    </p> -->
+    </p>  
+	
+<?php } ?>		
+
+<?php if(PAYPAL_STATUS === 1){?>
 
     <p style="text-align: center;margin: 0;">
         <span style="font-size:26px;"><strong><span style="color:#27ae60;">Перевод PayPal -</span>&nbsp;</strong></span><u><span
-                    style="font-size:24px;"><strong><a class="form_link" href="https://www.paypal.me/volkv" rel="external nofollow"><span
-                                style="color:#d35400;">PayPal.me/</span><span style="color:#27ae60;">volkv</span></a></strong></span></u>
+                    style="font-size:24px;"><strong><a class="form_link" href="<?=PAYPAL_URL;?>" rel="external nofollow"><span
+                                style="color:#d35400;">PayPal.me/</span><span style="color:#27ae60;"><?=PAYPAL_USER;?></span></a></strong></span></u>
     </p>
 
     <p style="margin: 0;text-align: center;">
@@ -237,8 +283,9 @@ if (!empty($_GET["guid"])) {
     </p>
 
     <p style="text-align: center;">
-        <input name="cmd" type="hidden" value="_s-xclick"><input name="encrypted" type="hidden" value="-----BEGIN PKCS7-----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-----END PKCS7-----
-">
+        <input name="cmd" type="hidden" value="_s-xclick"><input name="encrypted" type="hidden" value="<?=PAYPAL_KEY;?>">
     </p>
+	
+<?php } ?>		
 
 </div>
